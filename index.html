@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Swiss Approval – Protokoll Tokezimi</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 <style>
   :root {
     --red: #C0392B;
@@ -508,9 +508,12 @@ async function generateDoc() {
   btn.textContent = '⏳ Duke gjeneruar...';
 
   try {
+    const lib = window.docx;
+    if (!lib) throw new Error('Libraria docx nuk u ngarkua. Rifreskoni faqen dhe provoni përsëri.');
     const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
             AlignmentType, WidthType, BorderStyle, ShadingType, ImageRun,
-            HeadingLevel, VerticalAlign } = docx;
+            HeadingLevel, VerticalAlign } = lib;
+    const docx = lib;
 
     const dataFormatted = formatDate(dataRaw);
 
