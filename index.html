@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swiss Approval – Protokoll Tokezimi</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<style>
+  :root {
+    --red: #C0392B;
+    --dark: #1A1A2E;
+    --mid: #2C2C54;
+    --accent: #E74C3C;
+    --light: #F8F5F0;
+    --border: #DDD5C8;
+    --text: #2C2825;
+    --muted: #8B7D6B;
+    --white: #FFFFFF;
+    --success: #27AE60;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--dark);
+    color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-badge {
+    width: 42px;
+    height: 42px;
+    background: var(--red);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: white;
+    flex-shrink: 0;
+    letter-spacing: -1px;
+  }
+
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .header-text p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  .intro-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+
+  .intro-card h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+
+  .intro-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* SECTIONS */
+  .form-section {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    background: var(--dark);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-number {
+    width: 28px;
+    height: 28px;
+    background: var(--red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .section-body {
+    padding: 24px;
+  }
+
+  /* FIELDS */
+  .field-grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  .field-grid.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 560px) {
+    .field-grid.two-col { grid-template-columns: 1fr; }
+    main { padding: 20px 16px 80px; }
+    .section-body { padding: 18px; }
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--light);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+    background: white;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--border);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* PHOTO UPLOAD */
+  .photo-upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .photo-upload-area:hover {
+    border-color: var(--red);
+    background: rgba(192,57,43,0.04);
+  }
+
+  .photo-upload-area.has-photo {
+    border-style: solid;
+    border-color: var(--success);
+    background: rgba(39,174,96,0.04);
+  }
+
+  .photo-upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 0;
+  }
+
+  .upload-icon { font-size: 32px; margin-bottom: 8px; display: block; }
+  .upload-label { font-size: 14px; color: var(--muted); }
+  .upload-sub { font-size: 12px; color: var(--border); margin-top: 4px; }
+
+  #photo-preview {
+    margin-top: 16px;
+    display: none;
+    text-align: center;
+  }
+
+  #photo-preview img {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    object-fit: contain;
+  }
+
+  .photo-name {
+    font-size: 12px;
+    color: var(--success);
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  /* GENERATE BUTTON */
+  .generate-wrap {
+    margin-top: 32px;
+    text-align: center;
+  }
+
+  .btn-generate {
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 18px 48px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(192,57,43,0.3);
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .btn-generate:hover {
+    background: #A93226;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(192,57,43,0.4);
+  }
+
+  .btn-generate:active { transform: translateY(0); }
+
+  .btn-generate:disabled {
+    background: var(--muted);
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  /* STATUS */
+  .status-msg {
+    margin-top: 16px;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+    display: none;
+  }
+
+  .status-msg.success {
+    background: rgba(39,174,96,0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+  }
+
+  .status-msg.error {
+    background: rgba(192,57,43,0.1);
+    border: 1px solid var(--red);
+    color: var(--red);
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+
+  .required-star { color: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-badge">SA</div>
+    <div class="header-text">
+      <h1>Swiss Approval Albania</h1>
+      <p>Gjenerues i Protokollit të Tokëzimit</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="intro-card">
+    <h2>Protokoll Tokezimi – TU Panel</h2>
+    <p>Plotësoni të dhënat e mëposhtme. Pas plotësimit, klikoni <strong>"Gjenero Protokollin"</strong> për të shkarkuar dokumentin Word (.docx) gati për nënshkrim.</p>
+  </div>
+
+  <!-- SECTION 1: Objekti -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Të dhënat e Objektit</div>
+    </div>
+    <div class="section-body">
+      <div class="field-grid">
+        <div class="field-group">
+          <label for="objekti">Emri i Objektit <span class="required-star">*</span></label>
+          <input type="text" id="objekti" placeholder="p.sh. Ndërtesa Administrata, Tiranë" />
+        </div>
+        <div class="field-group">
+          <label for="adresa">Adresa e Subjektit <span class="required-star">*</span></label>
+          <input type="text" id="adresa" placeholder="p.sh. Rr. Dëshmorët e Kombit, Nr. 5, Tiranë" />
+        </div>
+        <div class="field-group">
+          <label for="subjekti">Emërtimi i Operatorit Ekonomik <span class="required-star">*</span></label>
+          <input type="text" id="subjekti" placeholder="p.sh. ABC Sh.p.k." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Inxhinieri & Data -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Inspektimi</div>
+    </div>
+    <div class="section-body">
+      <div class="field-grid two-col">
+        <div class="field-group">
+          <label for="inxhinieri">Emri i Inxhinierit <span class="required-star">*</span></label>
+          <input type="text" id="inxhinieri" placeholder="p.sh. Arben Kelmendi" />
+        </div>
+        <div class="field-group">
+          <label for="data">Data e Inspektimit <span class="required-star">*</span></label>
+          <input type="date" id="data" />
+        </div>
+        <div class="field-group">
+          <label for="temperatura">Temperatura e Ambjentit (°C) <span class="required-star">*</span></label>
+          <input type="number" id="temperatura" placeholder="p.sh. 22" step="0.1" />
+        </div>
+        <div class="field-group">
+          <label for="rezistenca">Vlera e Rezistencës së Tokëzimit (Ω) <span class="required-star">*</span></label>
+          <input type="text" id="rezistenca" placeholder="p.sh. 3.5" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Foto -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Foto e Matjes</div>
+    </div>
+    <div class="section-body">
+      <div class="photo-upload-area" id="upload-area">
+        <input type="file" id="foto-input" accept="image/*" capture="environment" onchange="handlePhoto(this)" />
+        <span class="upload-icon">📷</span>
+        <div class="upload-label">Klikoni ose fotografoni direkt nga celulari</div>
+        <div class="upload-sub">PNG, JPG, JPEG • Max 10MB</div>
+      </div>
+      <div id="photo-preview">
+        <img id="preview-img" src="" alt="Foto e ngarkuar" />
+        <div class="photo-name" id="photo-name-label"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="generate-wrap">
+    <button class="btn-generate" id="gen-btn" onclick="generateDoc()">
+      📄 Gjenero & Shkarko Protokollin (.docx)
+    </button>
+    <div class="status-msg" id="status-msg"></div>
+  </div>
+</main>
+
+<footer>
+  Swiss Approval Albania Sh.p.k. · Rr. "Sami Frashëri", Nr. 19, H. 8, 1019 Tiranë · +355 44309515
+</footer>
+
+<script>
+let photoDataUrl = null;
+let photoBase64 = null;
+let photoMimeType = null;
+
+function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const area = document.getElementById('upload-area');
+  const preview = document.getElementById('photo-preview');
+  const img = document.getElementById('preview-img');
+  const label = document.getElementById('photo-name-label');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    photoDataUrl = e.target.result;
+    // Extract base64 and mime type
+    const parts = photoDataUrl.split(',');
+    photoMimeType = parts[0].match(/:(.*?);/)[1];
+    photoBase64 = parts[1];
+
+    img.src = photoDataUrl;
+    label.textContent = '✓ ' + file.name;
+    preview.style.display = 'block';
+    area.classList.add('has-photo');
+  };
+  reader.readAsDataURL(file);
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status-msg ' + type;
+  el.style.display = 'block';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return d + '.' + m + '.' + y;
+}
+
+async function generateDoc() {
+  const btn = document.getElementById('gen-btn');
+
+  // Get values
+  const objekti    = document.getElementById('objekti').value.trim();
+  const adresa     = document.getElementById('adresa').value.trim();
+  const subjekti   = document.getElementById('subjekti').value.trim();
+  const inxhinieri = document.getElementById('inxhinieri').value.trim();
+  const dataRaw    = document.getElementById('data').value;
+  const temperatura= document.getElementById('temperatura').value.trim();
+  const rezistenca = document.getElementById('rezistenca').value.trim();
+
+  // Validate required
+  if (!objekti || !adresa || !subjekti || !inxhinieri || !dataRaw || !temperatura || !rezistenca) {
+    showStatus('⚠️ Ju lutem plotësoni të gjitha fushat e shënuara me *', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Duke gjeneruar...';
+
+  try {
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+            AlignmentType, WidthType, BorderStyle, ShadingType, ImageRun,
+            HeadingLevel, VerticalAlign } = docx;
+
+    const dataFormatted = formatDate(dataRaw);
+
+    const border = { style: BorderStyle.SINGLE, size: 4, color: '2C2C54' };
+    const borders = { top: border, bottom: border, left: border, right: border };
+
+    const cellStyle = (text, bold = false, center = false) => new TableCell({
+      borders,
+      margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      width: { size: 4500, type: WidthType.DXA },
+      children: [new Paragraph({
+        alignment: center ? AlignmentType.CENTER : AlignmentType.LEFT,
+        children: [new TextRun({ text, bold, size: 22, font: 'Calibri' })]
+      })]
+    });
+
+    const children = [];
+
+    // --- HEADER INFO ---
+    const addPara = (text, opts = {}) => new Paragraph({
+      alignment: opts.center ? AlignmentType.CENTER : AlignmentType.LEFT,
+      spacing: { before: opts.spaceBefore || 0, after: opts.spaceAfter || 120 },
+      children: [new TextRun({
+        text,
+        bold: opts.bold || false,
+        size: opts.size || 22,
+        font: 'Calibri',
+        color: opts.color || '000000',
+        italics: opts.italic || false,
+      })]
+    });
+
+    // Company header
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [new TextRun({ text: 'SWISS APPROVAL ALBANIA Shpk', bold: true, size: 28, font: 'Calibri' })]
+    }));
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [new TextRun({ text: 'Adresa: Rr. "Sami Frashëri", Nr. 19, H. 8, 1019 Tiranë, Albania', size: 18, font: 'Calibri', italics: true })]
+    }));
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [new TextRun({ text: 'Tel.: +355 44309515  Cel.: +355 697073002', size: 18, font: 'Calibri', italics: true })]
+    }));
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 300 },
+      children: [new TextRun({ text: 'www.swissapproval.al', size: 18, font: 'Calibri', italics: true })]
+    }));
+
+    // Title
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 100 },
+      children: [new TextRun({ text: 'Matje e rezistencës së tokëzimit te Paneli TU', bold: true, size: 26, font: 'Calibri' })]
+    }));
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 300 },
+      children: [new TextRun({ text: 'Objekti: ' + objekti, bold: true, size: 24, font: 'Calibri' })]
+    }));
+
+    // Info table
+    children.push(new Table({
+      width: { size: 9000, type: WidthType.DXA },
+      columnWidths: [4500, 4500],
+      rows: [
+        new TableRow({ children: [
+          cellStyle('Inxhinieri që kreu matjen :', true),
+          cellStyle(inxhinieri)
+        ]}),
+        new TableRow({ children: [
+          cellStyle('Emërtimi i Operatorit Ekonomik :', true),
+          cellStyle(subjekti)
+        ]}),
+        new TableRow({ children: [
+          cellStyle('Adresa :', true),
+          cellStyle(adresa)
+        ]})
+      ]
+    }));
+
+    children.push(new Paragraph({ spacing: { after: 200 }, children: [new TextRun('')] }));
+
+    // Section 1
+    children.push(new Paragraph({
+      spacing: { after: 120 },
+      children: [new TextRun({ text: '1. Skema e tokëzimit :', bold: true, size: 23, font: 'Calibri' })]
+    }));
+    children.push(new Paragraph({
+      spacing: { after: 200 },
+      children: [new TextRun({
+        text: 'Matja është kryer duke u bazuar në skemën ekzistuese të tokëzimit të objektit pa stakuar energjinë elektrike. Matja e sistemit të tokëzimit është bërë në zbritësin e tokëzimit, pa shkëputur tokëzimin.',
+        size: 22, font: 'Calibri'
+      })]
+    }));
+
+    // Section 2
+    children.push(new Paragraph({
+      spacing: { after: 120 },
+      children: [new TextRun({ text: '2. ', bold: true, size: 23, font: 'Calibri' }), new TextRun({
+        text: 'Nga matja e rezistencës së tokëzimit, e kryer me aparatin e tokëzimit tip ',
+        size: 23, font: 'Calibri', bold: true
+      }), new TextRun({
+        text: 'METREL MI 3155 EUROTESTXD',
+        bold: true, size: 23, font: 'Calibri'
+      }), new TextRun({
+        text: ', me datë ',
+        size: 23, font: 'Calibri', bold: true
+      }), new TextRun({
+        text: dataFormatted,
+        bold: true, size: 23, font: 'Calibri'
+      }), new TextRun({
+        text: ', me temperaturën e ambjentit t=',
+        size: 23, font: 'Calibri', bold: true
+      }), new TextRun({
+        text: temperatura + '°C',
+        bold: true, size: 23, font: 'Calibri'
+      }), new TextRun({
+        text: ' rezultoi se vlera e rezistencës së tokëzimit në të dyja pikat e matjes së saj është ',
+        size: 23, font: 'Calibri', bold: true
+      }), new TextRun({
+        text: 'Rt = ' + rezistenca + ' Ω',
+        bold: true, size: 23, font: 'Calibri'
+      }), new TextRun({
+        text: '. Nga rezultatet e marra nga matja, rezulton se vlera e rezistencës së tokëzimit është brenda parametrave të kërkuar nga IEC.',
+        size: 23, font: 'Calibri', bold: true
+      })]
+    }));
+
+    children.push(new Paragraph({ spacing: { after: 200 }, children: [new TextRun('')] }));
+
+    // Photo
+    if (photoBase64) {
+      try {
+        // Convert base64 to Uint8Array
+        const binaryStr = atob(photoBase64);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+        const ext = photoMimeType.includes('png') ? 'png' : 'jpg';
+        const imgType = photoMimeType.includes('png') ? docx.ImageRun.type?.PNG || 'png' : docx.ImageRun.type?.JPEG || 'jpg';
+
+        children.push(new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 100 },
+          children: [new ImageRun({
+            data: bytes,
+            transformation: { width: 400, height: 280 },
+            type: ext
+          })]
+        }));
+      } catch (imgErr) {
+        console.warn('Photo embed failed:', imgErr);
+        children.push(new Paragraph({
+          children: [new TextRun({ text: '[Foto e matjes]', size: 22, font: 'Calibri', italics: true })]
+        }));
+      }
+    } else {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: '[Foto e matjes]', size: 22, font: 'Calibri', italics: true })]
+      }));
+    }
+
+    children.push(new Paragraph({ spacing: { after: 300 }, children: [new TextRun('')] }));
+
+    // Signature line
+    children.push(new Paragraph({
+      children: [new TextRun({ text: 'Matjen e kreu : Ing. ' + inxhinieri, size: 22, font: 'Calibri', bold: true })]
+    }));
+
+    // Build doc
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            size: { width: 11906, height: 16838 },
+            margin: { top: 1200, right: 1200, bottom: 1200, left: 1200 }
+          }
+        },
+        children
+      }]
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Protokoll_Tokezimi_' + objekti.replace(/\s+/g, '_') + '_' + dataFormatted.replace(/\./g, '-') + '.docx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showStatus('✅ Dokumenti u gjenerua dhe u shkarkua me sukses!', 'success');
+  } catch (err) {
+    console.error(err);
+    showStatus('❌ Gabim gjatë gjenerimit: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📄 Gjenero & Shkarko Protokollin (.docx)';
+  }
+}
+
+// Set today's date as default
+document.getElementById('data').valueAsDate = new Date();
+</script>
+</body>
+</html>
