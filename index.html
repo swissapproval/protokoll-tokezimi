@@ -291,7 +291,8 @@ async function generateDoc() {
       // Replace <Foto> placeholder with an inline image drawing
       // Word stores text in <w:t> tags; <Foto> becomes &lt;Foto&gt; in XML
       // Word may also split it across multiple runs - handle all cases
-      const fotoPlaceholder = '&lt;Foto&gt;';
+      const fotoPlaceholder1 = '&lt;Foto&gt;';
+      const fotoPlaceholder2 = '<Foto>';
 
       // First, try to find and replace a fragmented <Foto> across runs
       // Pattern: multiple <w:r>...</w:r> blocks whose combined <w:t> content spells <Foto>
@@ -301,7 +302,8 @@ async function generateDoc() {
 
       if (xml.includes(fotoPlaceholder)) {
         // Simple case: placeholder is intact in one run
-        xml = xml.replace(fotoPlaceholder, drawing);
+        xml = xml.split(fotoPlaceholder1).join(drawing);
+        xml = xml.split(fotoPlaceholder2).join(drawing);
       } else {
         // Word split the placeholder across runs - reconstruct paragraph text
         // Find all <w:p> blocks and check their combined text
@@ -325,6 +327,7 @@ async function generateDoc() {
       // No photo: remove the <Foto> placeholder text (both intact and fragmented)
       if (xml.includes('&lt;Foto&gt;')) {
         xml = xml.split('&lt;Foto&gt;').join('');
+        xml = xml.split('<Foto>').join('');
       } else {
         xml = xml.replace(/(<w:p[ >][\s\S]*?<\/w:p>)/g, function(para) {
           const runMatches = [...para.matchAll(/<w:r[ >][\s\S]*?<\/w:r>/g)];
