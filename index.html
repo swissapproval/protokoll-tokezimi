@@ -146,9 +146,9 @@
     </div>
     <div class="section-body">
       <div class="photo-upload-area" id="upload-area">
-        <input type="file" id="foto-input" accept="image/*" capture="environment" onchange="handlePhoto(this)" />
+        <input type="file" id="foto-input" accept="image/*" onchange="handlePhoto(this)" />
         <span class="upload-icon">📷</span>
-        <div class="upload-label">Klikoni ose fotografoni direkt nga celulari</div>
+        <div class="upload-label">Klikoni për të ngarkuar foto ose fotografoni direkt</div>
         <div class="upload-sub">PNG, JPG, JPEG • Max 10MB</div>
       </div>
       <div id="photo-preview">
@@ -289,12 +289,54 @@ async function generateDoc() {
       }
 
       // Replace <Foto> placeholder with an inline image drawing
+      // Word stores text in <w:t> tags; <Foto> becomes &lt;Foto&gt; in XML
+      // Word may also split it across multiple runs - handle all cases
       const fotoPlaceholder = '&lt;Foto&gt;';
+
+      // First, try to find and replace a fragmented <Foto> across runs
+      // Pattern: multiple <w:r>...</w:r> blocks whose combined <w:t> content spells <Foto>
+      // We replace the entire paragraph run sequence containing &lt;Foto&gt;
+      // by scanning for it and replacing just the w:r that contains the w:t with the placeholder
       const drawing = `<w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="5334000" cy="3600000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Foto"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="Foto"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${newRid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="5334000" cy="3600000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`;
-      xml = xml.replace(fotoPlaceholder, drawing);
+
+      if (xml.includes(fotoPlaceholder)) {
+        // Simple case: placeholder is intact in one run
+        xml = xml.replace(fotoPlaceholder, drawing);
+      } else {
+        // Word split the placeholder across runs - reconstruct paragraph text
+        // Find all <w:p> blocks and check their combined text
+        xml = xml.replace(/(<w:p[ >][\s\S]*?<\/w:p>)/g, function(para) {
+          // Extract all w:t text content from this paragraph
+          const textContent = [];
+          const runMatches = [...para.matchAll(/<w:r[ >][\s\S]*?<\/w:r>/g)];
+          let combined = '';
+          runMatches.forEach(m => {
+            const tMatch = m[0].match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/);
+            combined += tMatch ? tMatch[1] : '';
+          });
+          // If combined text of paragraph is just <Foto>, replace entire paragraph
+          if (combined === '<Foto>') {
+            return `<w:p><w:r><w:rPr/><w:t> </w:t></w:r><w:r>${drawing}</w:r></w:p>`;
+          }
+          return para;
+        });
+      }
     } else {
-      // No photo: remove the <Foto> placeholder text
-      xml = xml.split('&lt;Foto&gt;').join('');
+      // No photo: remove the <Foto> placeholder text (both intact and fragmented)
+      if (xml.includes('&lt;Foto&gt;')) {
+        xml = xml.split('&lt;Foto&gt;').join('');
+      } else {
+        xml = xml.replace(/(<w:p[ >][\s\S]*?<\/w:p>)/g, function(para) {
+          const runMatches = [...para.matchAll(/<w:r[ >][\s\S]*?<\/w:r>/g)];
+          let combined = '';
+          runMatches.forEach(m => {
+            const tMatch = m[0].match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/);
+            combined += tMatch ? tMatch[1] : '';
+          });
+          if (combined === '<Foto>') return '';
+          return para;
+        });
+      }
     }
 
     zip.file('word/document.xml', xml);
@@ -304,7 +346,7 @@ async function generateDoc() {
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
-    a.download = 'Protokoll_Tokezimi_' + objekti.replace(/\s+/g, '_') + '_' + formatDate(dataRaw).replace(/\./g, '-') + '.docx';
+    a.download = 'Protokoll Tokezimi ' + objekti + '.docx';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
