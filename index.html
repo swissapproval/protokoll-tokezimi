@@ -279,6 +279,14 @@ async function generateDoc() {
     const docFile = zip.file('word/document.xml');
     let   xml     = await docFile.async('string');
 
+    // Inject missing DrawingML namespaces into root element (required for image embedding)
+    if (!xml.includes('xmlns:a=')) {
+      xml = xml.replace(
+        '<w:document ',
+        '<w:document xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" '
+      );
+    }
+
     const dateFormatted = formatDate(dataRaw);
 
     const replacements = {
@@ -332,33 +340,9 @@ if (photoFile && photoBase64) {
     zip.file("[Content_Types].xml", ctXml);
   }
 
-  // Word drawing element
+  // Word drawing element — namespaces declared on root (injected above), not inline
   const drawing =
-  `<w:r>
-      <w:drawing>
-        <wp:inline distT="0" distB="0" distL="0" distR="0">
-          <wp:extent cx="5334000" cy="3600000"/>
-          <wp:docPr id="99" name="Foto"/>
-          <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
-            <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
-              <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
-                <pic:blipFill>
-                  <a:blip r:embed="${newRid}"/>
-                  <a:stretch><a:fillRect/></a:stretch>
-                </pic:blipFill>
-                <pic:spPr>
-                  <a:xfrm>
-                    <a:off x="0" y="0"/>
-                    <a:ext cx="5334000" cy="3600000"/>
-                  </a:xfrm>
-                  <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-                </pic:spPr>
-              </pic:pic>
-            </a:graphicData>
-          </a:graphic>
-        </wp:inline>
-      </w:drawing>
-   </w:r>`;
+  `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="5334000" cy="3600000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Foto"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="Foto"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${newRid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="5334000" cy="3600000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
 
   // Replace placeholder
   xml = xml.split("<Foto>").join(drawing);
