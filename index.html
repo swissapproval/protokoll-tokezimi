@@ -265,84 +265,55 @@ async function generateDoc() {
       xml = xml.split(placeholder).join(value);
     }
 
-    // 4. Handle photo
-    if (photoBase64) {
-      // Add image file to media folder
-      const imgFileName = 'word/media/image_foto.' + photoExt;
-      zip.file(imgFileName, photoBase64, { base64: true });
+   // 4. Handle photo
+if (photoBase64) {
 
-      // Add relationship for the new image
-      const relsFile = zip.file('word/_rels/document.xml.rels');
-      let   relsXml  = await relsFile.async('string');
-      const newRid   = 'rId99';
-      const ct       = photoExt === 'png' ? 'image/png' : 'image/jpeg';
-      const relEntry = `<Relationship Id="${newRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image_foto.${photoExt}"/>`;
-      relsXml = relsXml.replace('</Relationships>', relEntry + '</Relationships>');
-      zip.file('word/_rels/document.xml.rels', relsXml);
+const imgFileName = 'word/media/image_foto.' + photoExt;
+zip.file(imgFileName, photoBase64, { base64: true });
 
-      // Register content type if needed
-      const ctFile = zip.file('[Content_Types].xml');
-      let   ctXml  = await ctFile.async('string');
-      if (!ctXml.includes(`Extension="${photoExt}"`)) {
-        ctXml = ctXml.replace('</Types>', `<Default Extension="${photoExt}" ContentType="${ct}"/></Types>`);
-        zip.file('[Content_Types].xml', ctXml);
-      }
+// Add relationship
+const relsFile = zip.file('word/_rels/document.xml.rels');
+let relsXml = await relsFile.async('string');
 
-      // Replace <Foto> placeholder with an inline image drawing
-      // Word stores text in <w:t> tags; <Foto> becomes &lt;Foto&gt; in XML
-      // Word may also split it across multiple runs - handle all cases
-      const fotoPlaceholder1 = '&lt;Foto&gt;';
-      const fotoPlaceholder2 = '<Foto>';
+const newRid = 'rId99';
 
-      // First, try to find and replace a fragmented <Foto> across runs
-      // Pattern: multiple <w:r>...</w:r> blocks whose combined <w:t> content spells <Foto>
-      // We replace the entire paragraph run sequence containing &lt;Foto&gt;
-      // by scanning for it and replacing just the w:r that contains the w:t with the placeholder
-      const drawing = `<w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="5334000" cy="3600000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Foto"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="Foto"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${newRid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="5334000" cy="3600000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`;
+const relEntry =
+<Relationship Id="${newRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image_foto.${photoExt}"/>;
 
-      if (xml.includes(fotoPlaceholder)) {
-        // Simple case: placeholder is intact in one run
-        xml = xml.split(fotoPlaceholder1).join(drawing);
-        xml = xml.split(fotoPlaceholder2).join(drawing);
-      } else {
-        // Word split the placeholder across runs - reconstruct paragraph text
-        // Find all <w:p> blocks and check their combined text
-        xml = xml.replace(/(<w:p[ >][\s\S]*?<\/w:p>)/g, function(para) {
-          // Extract all w:t text content from this paragraph
-          const textContent = [];
-          const runMatches = [...para.matchAll(/<w:r[ >][\s\S]*?<\/w:r>/g)];
-          let combined = '';
-          runMatches.forEach(m => {
-            const tMatch = m[0].match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/);
-            combined += tMatch ? tMatch[1] : '';
-          });
-          // If combined text of paragraph is just <Foto>, replace entire paragraph
-          if (combined === '<Foto>') {
-            return `<w:p><w:r><w:rPr/><w:t> </w:t></w:r><w:r>${drawing}</w:r></w:p>`;
-          }
-          return para;
-        });
-      }
-    } else {
-      // No photo: remove the <Foto> placeholder text (both intact and fragmented)
-      if (xml.includes('&lt;Foto&gt;')) {
-        xml = xml.split('&lt;Foto&gt;').join('');
-        xml = xml.split('<Foto>').join('');
-      } else {
-        xml = xml.replace(/(<w:p[ >][\s\S]*?<\/w:p>)/g, function(para) {
-          const runMatches = [...para.matchAll(/<w:r[ >][\s\S]*?<\/w:r>/g)];
-          let combined = '';
-          runMatches.forEach(m => {
-            const tMatch = m[0].match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/);
-            combined += tMatch ? tMatch[1] : '';
-          });
-          if (combined === '<Foto>') return '';
-          return para;
-        });
-      }
-    }
+relsXml = relsXml.replace('</Relationships>', relEntry + '</Relationships>');
+zip.file('word/_rels/document.xml.rels', relsXml);
 
-    zip.file('word/document.xml', xml);
+// Register content type
+const ctFile = zip.file('[Content_Types].xml');
+let ctXml = await ctFile.async('string');
+
+const ct = photoExt === 'png' ? 'image/png' : 'image/jpeg';
+
+if (!ctXml.includes(Extension="${photoExt}")) {
+ctXml = ctXml.replace(
+'</Types>',
+<Default Extension="${photoExt}" ContentType="${ct}"/></Types>
+);
+zip.file('[Content_Types].xml', ctXml);
+}
+
+// Word drawing element
+const drawing =
+<w:r> <w:drawing> <wp:inline distT="0" distB="0" distL="0" distR="0"> <wp:extent cx="5334000" cy="3600000"/> <wp:docPr id="99" name="Foto"/> <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"> <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"> <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"> <pic:blipFill> <a:blip r:embed="${newRid}"/> <a:stretch><a:fillRect/></a:stretch> </pic:blipFill> <pic:spPr> <a:xfrm> <a:off x="0" y="0"/> <a:ext cx="5334000" cy="3600000"/> </a:xfrm> <a:prstGeom prst="rect"><a:avLst/></a:prstGeom> </pic:spPr> </pic:pic> </a:graphicData> </a:graphic> </wp:inline> </w:drawing> </w:r>;
+
+// Replace placeholder
+xml = xml.split('<Foto>').join(drawing);
+xml = xml.split('<Foto>').join(drawing);
+
+} else {
+
+// Remove placeholder if no photo
+xml = xml.split('<Foto>').join('');
+xml = xml.split('<Foto>').join('');
+
+}
+
+zip.file('word/document.xml', xml);
 
     // 5. Generate and download
     const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
