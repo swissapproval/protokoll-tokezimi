@@ -265,55 +265,101 @@ async function generateDoc() {
       xml = xml.split(placeholder).join(value);
     }
 
-   // 4. Handle photo
-if (photoBase64) {
+ // 4. Handle photo
+if (photoFile) {
 
-const imgFileName = 'word/media/image_foto.' + photoExt;
-zip.file(imgFileName, photoBase64, { base64: true });
+  // Detect extension safely for mobile devices
+  let photoExt = "jpg";
 
-// Add relationship
-const relsFile = zip.file('word/_rels/document.xml.rels');
-let relsXml = await relsFile.async('string');
+  if (photoFile.type.includes("png")) {
+    photoExt = "png";
+  } else if (photoFile.type.includes("jpeg") || photoFile.type.includes("jpg")) {
+    photoExt = "jpg";
+  } else {
+    photoExt = "jpg"; // fallback for mobile cameras
+  }
 
-const newRid = 'rId99';
+  // Convert file to base64 (mobile-safe)
+  const photoBase64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(photoFile);
+  });
 
-const relEntry =
-<Relationship Id="${newRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image_foto.${photoExt}"/>;
+  // Save image inside DOCX
+  const imgFileName = "word/media/image_foto." + photoExt;
+  zip.file(imgFileName, photoBase64, { base64: true });
 
-relsXml = relsXml.replace('</Relationships>', relEntry + '</Relationships>');
-zip.file('word/_rels/document.xml.rels', relsXml);
+  // Add relationship
+  const relsFile = zip.file("word/_rels/document.xml.rels");
+  let relsXml = await relsFile.async("string");
 
-// Register content type
-const ctFile = zip.file('[Content_Types].xml');
-let ctXml = await ctFile.async('string');
+  const newRid = "rId99";
 
-const ct = photoExt === 'png' ? 'image/png' : 'image/jpeg';
+  const relEntry =
+    `<Relationship Id="${newRid}"
+    Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+    Target="media/image_foto.${photoExt}"/>`;
 
-if (!ctXml.includes(Extension="${photoExt}")) {
-ctXml = ctXml.replace(
-'</Types>',
-<Default Extension="${photoExt}" ContentType="${ct}"/></Types>
-);
-zip.file('[Content_Types].xml', ctXml);
-}
+  relsXml = relsXml.replace("</Relationships>", relEntry + "</Relationships>");
+  zip.file("word/_rels/document.xml.rels", relsXml);
 
-// Word drawing element
-const drawing =
-<w:r> <w:drawing> <wp:inline distT="0" distB="0" distL="0" distR="0"> <wp:extent cx="5334000" cy="3600000"/> <wp:docPr id="99" name="Foto"/> <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"> <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"> <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"> <pic:blipFill> <a:blip r:embed="${newRid}"/> <a:stretch><a:fillRect/></a:stretch> </pic:blipFill> <pic:spPr> <a:xfrm> <a:off x="0" y="0"/> <a:ext cx="5334000" cy="3600000"/> </a:xfrm> <a:prstGeom prst="rect"><a:avLst/></a:prstGeom> </pic:spPr> </pic:pic> </a:graphicData> </a:graphic> </wp:inline> </w:drawing> </w:r>;
+  // Register content type
+  const ctFile = zip.file("[Content_Types].xml");
+  let ctXml = await ctFile.async("string");
 
-// Replace placeholder
-xml = xml.split('<Foto>').join(drawing);
-xml = xml.split('<Foto>').join(drawing);
+  const ct = photoExt === "png" ? "image/png" : "image/jpeg";
+
+  if (!ctXml.includes(`Extension="${photoExt}"`)) {
+    ctXml = ctXml.replace(
+      "</Types>",
+      `<Default Extension="${photoExt}" ContentType="${ct}"/></Types>`
+    );
+    zip.file("[Content_Types].xml", ctXml);
+  }
+
+  // Word drawing element
+  const drawing =
+  `<w:r>
+      <w:drawing>
+        <wp:inline distT="0" distB="0" distL="0" distR="0">
+          <wp:extent cx="5334000" cy="3600000"/>
+          <wp:docPr id="99" name="Foto"/>
+          <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+            <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+              <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:blipFill>
+                  <a:blip r:embed="${newRid}"/>
+                  <a:stretch><a:fillRect/></a:stretch>
+                </pic:blipFill>
+                <pic:spPr>
+                  <a:xfrm>
+                    <a:off x="0" y="0"/>
+                    <a:ext cx="5334000" cy="3600000"/>
+                  </a:xfrm>
+                  <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
+                </pic:spPr>
+              </pic:pic>
+            </a:graphicData>
+          </a:graphic>
+        </wp:inline>
+      </w:drawing>
+   </w:r>`;
+
+  // Replace placeholder
+  xml = xml.split("<Foto>").join(drawing);
+  xml = xml.split("&lt;Foto&gt;").join(drawing);
 
 } else {
 
-// Remove placeholder if no photo
-xml = xml.split('<Foto>').join('');
-xml = xml.split('<Foto>').join('');
+  // Remove placeholder if no photo
+  xml = xml.split("<Foto>").join("");
+  xml = xml.split("&lt;Foto&gt;").join("");
 
 }
 
-zip.file('word/document.xml', xml);
+zip.file("word/document.xml", xml);
 
     // 5. Generate and download
     const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
