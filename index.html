@@ -341,23 +341,13 @@ if (photoFile && photoBase64) {
   }
 
   // Word drawing element — namespaces declared on root (injected above), not inline
-  // Size: 8.36" wide x 6.27" tall = 7644384 x 5733288 EMU (always portrait orientation)
-  // If the uploaded photo is landscape (width > height), rotate it 90° so it always appears vertical.
-  const CX = 7644384; // 8.36 inches in EMU
-  const CY = 5733288; // 6.27 inches in EMU
-
-  // Detect orientation from the image dimensions
-  const imgEl = document.getElementById('preview-img');
-  const isLandscape = imgEl.naturalWidth > imgEl.naturalHeight;
-
-  // When rotating 90°, Word needs cx/cy swapped in <wp:extent> but the shape uses original cx/cy
-  // rot="5400000" = 90 degrees (in 60000ths of a degree)
-  const extentCx = isLandscape ? CY : CX;
-  const extentCy = isLandscape ? CX : CY;
-  const rotAttr  = isLandscape ? ' rot="5400000"' : '';
+  // Size matches the docx template photo slot: cx=5695950 cy=7594599 EMU (~6.08" x 8.11", portrait)
+  // No rotation applied — Word will stretch/fit the image into this fixed portrait frame.
+  const CX = 5695950; // ~6.08 inches in EMU
+  const CY = 7594599; // ~8.11 inches in EMU
 
   const drawing =
-  `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${extentCx}" cy="${extentCy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Foto"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="Foto"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${newRid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm${rotAttr}><a:off x="0" y="0"/><a:ext cx="${CX}" cy="${CY}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
+  `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${CX}" cy="${CY}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Foto"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="Foto"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${newRid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${CX}" cy="${CY}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
 
   // Replace the entire <w:p>...</w:p> paragraph that contains &lt;Foto&gt;
   // An image CANNOT live inside <w:r><w:t> — it must replace the whole paragraph.
