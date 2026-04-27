@@ -341,13 +341,15 @@ if (photoFile && photoBase64) {
   }
 
   // Word drawing element — namespaces declared on root (injected above), not inline
-  // Size matches the docx template photo slot: cx=5695950 cy=7594599 EMU (~6.08" x 8.11", portrait)
-  // No rotation applied — Word will stretch/fit the image into this fixed portrait frame.
-  const CX = 5695950; // ~6.08 inches in EMU
-  const CY = 7594599; // ~8.11 inches in EMU
+  // Dimensions exactly matching the UserPhoto slot in the template docx
+  // wp:extent = container box; a:ext = picture shape (slightly larger per template)
+  const EXTENT_CX = 5695950;  // 6.23" in EMU
+  const EXTENT_CY = 7594599;  // 8.31" in EMU
+  const SHAPE_CX  = 5727251;  // template's inner pic shape width
+  const SHAPE_CY  = 7636333;  // template's inner pic shape height
 
   const drawing =
-  `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${CX}" cy="${CY}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Foto"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="Foto"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${newRid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm rot="16200000"><a:off x="0" y="0"/><a:ext cx="${CX}" cy="${CY}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
+  `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${EXTENT_CX}" cy="${EXTENT_CY}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Foto"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="Foto"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${newRid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${SHAPE_CX}" cy="${SHAPE_CY}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
 
   // Replace the entire <w:p>...</w:p> paragraph that contains &lt;Foto&gt;
   // An image CANNOT live inside <w:r><w:t> — it must replace the whole paragraph.
